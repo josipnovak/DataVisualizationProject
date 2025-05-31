@@ -1,7 +1,7 @@
 {
     "Premier League": [
         {"club":"Arsenal","annualWageBillEUR":176364000,"totalMarketValue":619250000,"squad":42,"foreignPlayers":27,"averageAge":24.9,"goals":55,"wins":18,"draws":7,"losses":13,"position":8,"lat":51.555,"lon":-0.1086, "logo": "crests/arsenal.png"},
-        {"club":"Aston Villa","annualWageBillEUR":74493578,"totalMarketValue":430700000,"squad":53,"foreignPlayers":24,"averageAge":23.9,"goals":55,"wins":16,"draws":7,"losses":15,"position":11,"lat":52.5092,"lon":-1.8849, "logo": "crests/aston_villa.png"},
+        {"club":"Aston Villa","annualWageBillEUR":74493578,"totalMarketValue":430700000,"squad":53,"foreignPlayers":24,"averageAge":23.9,"goals":55,"wins":16,"draws":7,"losses":15,"position":11,"lat":52.5092,"lon":-1.8849, "logo": "crests/astonvilla.png"},
         {"club":"Brighton & Hove Albion","annualWageBillEUR":60501435,"totalMarketValue":290400000,"squad":46,"foreignPlayers":30,"averageAge":24.9,"goals":40,"wins":9,"draws":14,"losses":15,"position":16,"lat":50.8616,"lon":-0.0837, "logo": "crests/brighton.png"},
         {"club":"Burnley","annualWageBillEUR":41964650,"totalMarketValue":132300000,"squad":32,"foreignPlayers":11,"averageAge":27.1,"goals":33,"wins":10,"draws":9,"losses":19,"position":17,"lat":53.789,"lon":-2.2304, "logo": "crests/burnley.png"},
         {"club":"Chelsea","annualWageBillEUR":187348800,"totalMarketValue":889200000,"squad":39,"foreignPlayers":23,"averageAge":25.7,"goals":58,"wins":19,"draws":10,"losses":9,"position":4,"lat":51.4817,"lon":-0.191, "logo": "crests/chelsea.png"},
@@ -23,7 +23,7 @@
     ],
     "La Liga": [
         {"club":"Alaves","annualWageBillEUR":23500000,"totalMarketValue":79800000,"squad":35,"foreignPlayers":10,"averageAge":26.1,"goals":36,"wins":9,"draws":11,"losses":18,"position":16,"lat":42.8497,"lon":-2.6727, "logo": "crests/alaves.png"},
-        {"club":"Athletic Club","annualWageBillEUR":69700000,"totalMarketValue":204150000,"squad":32,"foreignPlayers":2,"averageAge":26.4,"goals":46,"wins":11,"draws":13,"losses":14,"position":10,"lat":43.2641,"lon":-2.9496, "logo": "crests/athletic.png"},
+        {"club":"Athletic Club","annualWageBillEUR":69700000,"totalMarketValue":204150000,"squad":32,"foreignPlayers":2,"averageAge":26.4,"goals":46,"wins":11,"draws":13,"losses":14,"position":10,"lat":43.2641,"lon":-2.9496, "logo": "crests/bilbao.png"},
         {"club":"Atletico Madrid","annualWageBillEUR":181200000,"totalMarketValue":773100000,"squad":39,"foreignPlayers":21,"averageAge":25.4,"goals":67,"wins":26,"draws":8,"losses":4,"position":1,"lat":40.4362,"lon":-3.5995, "logo": "crests/atletico.png"},
         {"club":"Barcelona","annualWageBillEUR":327480000,"totalMarketValue":813500000,"squad":32,"foreignPlayers":20,"averageAge":25.5,"goals":85,"wins":24,"draws":7,"losses":7,"position":3,"lat":41.3809,"lon":2.1228, "logo": "crests/barcelona.png"},
         {"club":"Cadiz","annualWageBillEUR":16890000,"totalMarketValue":47650000,"squad":41,"foreignPlayers":16,"averageAge":27.6,"goals":36,"wins":11,"draws":11,"losses":16,"position":12,"lat":36.5024,"lon":-6.2732, "logo": "crests/cadiz.png"},
@@ -35,7 +35,7 @@
         {"club":"Huesca","annualWageBillEUR":17000000,"totalMarketValue":64100000,"squad":34,"foreignPlayers":9,"averageAge":26.9,"goals":34,"wins":7,"draws":13,"losses":18,"position":18,"lat":42.1318,"lon":-0.4081, "logo": "crests/huesca.png"},
         {"club":"Levante","annualWageBillEUR":18080000,"totalMarketValue":113000000,"squad":34,"foreignPlayers":10,"averageAge":27.0,"goals":46,"wins":9,"draws":14,"losses":15,"position":14,"lat":39.4746,"lon":-0.3616, "logo": "crests/levante.png"},
         {"club":"Osasuna","annualWageBillEUR":20150000,"totalMarketValue":96750000,"squad":36,"foreignPlayers":6,"averageAge":27.5,"goals":37,"wins":11,"draws":11,"losses":16,"position":11,"lat":42.8122,"lon":-1.6461, "logo": "crests/osasuna.png"},
-        {"club":"Real Betis","annualWageBillEUR":39420000,"totalMarketValue":207700000,"squad":33,"foreignPlayers":12,"averageAge":27.2,"goals":50,"wins":17,"draws":10,"losses":11,"position":6,"lat":37.3564,"lon":-5.9819, "logo": "crests/betis.png"},
+        {"club":"Real Betis","annualWageBillEUR":39420000,"totalMarketValue":207700000,"squad":33,"foreignPlayers":12,"averageAge":27.2,"goals":50,"wins":17,"draws":10,"losses":11,"position":6,"lat":37.3564,"lon":-5.9819, "logo": "crests/realbetis.png"},
         {"club":"Real Madrid","annualWageBillEUR":305900000,"totalMarketValue":787300000,"squad":37,"foreignPlayers":17,"averageAge":25.3,"goals":67,"wins":25,"draws":9,"losses":4,"position":2,"lat":40.4531,"lon":-3.6883, "logo": "crests/realmadrid.png"},
         {"club":"Real Sociedad","annualWageBillEUR":46830000,"totalMarketValue":406600000,"squad":38,"foreignPlayers":5,"averageAge":25.1,"goals":59,"wins":17,"draws":11,"losses":10,"position":5,"lat":43.3017,"lon":-1.9736, "logo": "crests/sociedad.png"},
         {"club":"Real Valladolid","annualWageBillEUR":23210000,"totalMarketValue":63350000,"squad":41,"foreignPlayers":9,"averageAge":27.1,"goals":34,"wins":5,"draws":16,"losses":17,"position":19,"lat":41.629,"lon":-4.7544, "logo": "crests/valladolid.png"},
@@ -44,7 +44,7 @@
         {"club":"Villarreal","annualWageBillEUR":65670000,"totalMarketValue":292600000,"squad":36,"foreignPlayers":13,"averageAge":26.4,"goals":60,"wins":15,"draws":13,"losses":10,"position":7,"lat":39.9448,"lon":-0.1032, "logo": "crests/villarreal.png"}
     ],
     "Serie A": [
-        {"club":"AC Milan","annualWageBillEUR":83790000,"totalMarketValue":546950000,"squad":37,"foreignPlayers":22,"averageAge":25.8,"goals":74,"wins":24,"draws":7,"losses":7,"position":2,"lat":45.4781,"lon":9.124, "logo": "crests/ac_milan.png"},
+        {"club":"AC Milan","annualWageBillEUR":83790000,"totalMarketValue":546950000,"squad":37,"foreignPlayers":22,"averageAge":25.8,"goals":74,"wins":24,"draws":7,"losses":7,"position":2,"lat":45.4781,"lon":9.124, "logo": "crests/milan.png"},
         {"club":"Atalanta","annualWageBillEUR":44457000,"totalMarketValue":398750000,"squad":44,"foreignPlayers":24,"averageAge":24.9,"goals":90,"wins":23,"draws":9,"losses":6,"position":3,"lat":45.7067,"lon":9.6722, "logo": "crests/atalanta.png"},
         {"club":"Benevento","annualWageBillEUR":32404000,"totalMarketValue":50130000,"squad":36,"foreignPlayers":14,"averageAge":27.8,"goals":40,"wins":7,"draws":12,"losses":19,"position":18,"lat":41.1332,"lon":14.7821, "logo": "crests/benevento.png"},
         {"club":"Bologna","annualWageBillEUR":35322000,"totalMarketValue":186200000,"squad":45,"foreignPlayers":28,"averageAge":24.2,"goals":51,"wins":10,"draws":11,"losses":17,"position":12,"lat":44.4942,"lon":11.3456, "logo": "crests/bologna.png"},
@@ -52,7 +52,7 @@
         {"club":"Crotone","annualWageBillEUR":18987000,"totalMarketValue":52750000,"squad":41,"foreignPlayers":19,"averageAge":26.5,"goals":46,"wins":6,"draws":5,"losses":27,"position":19,"lat":39.0807,"lon":17.1272, "logo": "crests/crotone.png"},
         {"club":"Fiorentina","annualWageBillEUR":52454000,"totalMarketValue":325800000,"squad":38,"foreignPlayers":22,"averageAge":25.9,"goals":47,"wins":9,"draws":13,"losses":16,"position":14,"lat":43.7808,"lon":11.2826, "logo": "crests/fiorentina.png"},
         {"club":"Genoa","annualWageBillEUR":41653000,"totalMarketValue":121280000,"squad":47,"foreignPlayers":24,"averageAge":26.5,"goals":47,"wins":10,"draws":12,"losses":16,"position":11,"lat":44.4114,"lon":8.9339, "logo": "crests/genoa.png"},
-        {"club":"Hellas Verona","annualWageBillEUR":29834000,"totalMarketValue":162980000,"squad":43,"foreignPlayers":19,"averageAge":25.2,"goals":46,"wins":11,"draws":12,"losses":15,"position":10,"lat":45.4304,"lon":10.9681, "logo": "crests/hellas_verona.png"},
+        {"club":"Hellas Verona","annualWageBillEUR":29834000,"totalMarketValue":162980000,"squad":43,"foreignPlayers":19,"averageAge":25.2,"goals":46,"wins":11,"draws":12,"losses":15,"position":10,"lat":45.4304,"lon":10.9681, "logo": "crests/verona.png"},
         {"club":"Inter","annualWageBillEUR":140430000,"totalMarketValue":558550000,"squad":36,"foreignPlayers":20,"averageAge":27.7,"goals":89,"wins":28,"draws":7,"losses":3,"position":1,"lat":45.4781,"lon":9.124, "logo": "crests/inter.png"},
         {"club":"Juventus","annualWageBillEUR":216116000,"totalMarketValue":642500000,"squad":43,"foreignPlayers":24,"averageAge":25.5,"goals":77,"wins":23,"draws":9,"losses":6,"position":4,"lat":45.1096,"lon":7.6413, "logo": "crests/juventus.png"},
         {"club":"Lazio","annualWageBillEUR":87904000,"totalMarketValue":264530000,"squad":35,"foreignPlayers":24,"averageAge":27.5,"goals":61,"wins":21,"draws":5,"losses":12,"position":6,"lat":41.9339,"lon":12.4545, "logo": "crests/lazio.png"},
