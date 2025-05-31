@@ -9,15 +9,23 @@
             font-family: Arial, sans-serif;
         }
         #map {  
-            width: 50%;
+            width: 55%;
             height: 600px;
             border-right: 2px solid #ccc;
         }
+        
         #charts {
-            width: 50%;
-            padding: 20px;
+            width: 45%;
+            height: 640px;
+            padding: 10px;
             display: flex;
             flex-direction: column;
+            justify-content: flex-start;
+            gap: 10px;
+            align-items: center;
+        }
+        #charts.country-view {
+            background-color: #4caf4fa0;
         }
         .selectors {
             display: flex;
@@ -25,54 +33,82 @@
             align-items: center;
         }
         .chart {
-            margin: 20px 0;
-            padding: 15px;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            background: #fafbfc;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
         }
         .country {
-            fill: #ddd;
-            stroke: #fff;
             cursor: pointer;
-        }
-        .country:hover {
-            fill: #999;
-        }
-        .bar {
-            fill: #4aaeea;
-            transition: all 0.3s;
         }
         .axis text {
             font-size: 12px;
         }
         .metric-btn {
-            margin-right: 8px;
-            padding: 6px 14px;
-            border: 1px solid #4aaeea;
-            background: #fff;
-            color: #333;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 18px;
             border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.2s, color 0.2s;
+            font-weight: bold;
         }
         .metric-btn.active, .metric-btn:hover {
-            background: #4aaeea;
-            color: #fff;
+            background-color: #388e3c;
+            color: white;
+        }
+        .country-header {
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        .bar-label {
+            fill: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .club-name {
+            fill: white;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        #countryBarChart{
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
-<body>
+<body style="margin: 0; padding: 0; background-color: #eaeaea;">
+    <div style="background-color: #0b762d; padding: 20px 0; text-align: center; color: white; font-size: 24px; font-family: sans-serif;">
+        Vizualizacija top 5 Europskih nogometnih liga
+    </div>
     <div class="container">
         <div id="map">
-            <div style="width:500px; margin: 0 auto 10px auto; text-align:center;">
-                <input type="range" id="seasonSlider" min="0" max="4" step="1" value="4" style="width:350px;">
-                <span id="sliderLabel" style="margin-left:15px; font-weight:bold;">24/25</span>
+            <div style="text-align:center; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: center; gap: 25px; margin-bottom: 5px;">
+                <span>20/21</span><span>21/22</span><span>22/23</span><span>23/24</span><span>24/25</span>
             </div>
+            <input type="range" id="seasonSlider" min="0" max="4" step="1" value="4" 
+                style="width: 35%; height: 10px; border-radius: 5px; background-color: #ccc;">
         </div>
-        <div id="charts">
-            <div id="tooltip" style="position:absolute; pointer-events:none; background:#fff; border:1px solid #ccc; border-radius:6px; padding:8px 12px; font-size:14px; display:none; z-index:10;"></div>
+        </div>
+        <div id="leagueChart"></div>
+        <div id="charts" style="position: relative;">
+            <div id="tooltip" style="position:fixed; pointer-events:none; background:#fff; border:1px solid #ccc; border-radius:6px; padding:8px 12px; font-size:14px; display:none;"></div>
             <div class="selectors">
                 <div id="metricButtons" style="display:inline-block;">
                     <button class="metric-btn" data-metric="goals">Golovi</button>
@@ -82,8 +118,7 @@
                 </div>
             </div>
             <div id="seasonLineChart" class="chart"></div>
-            <div id="stackedBarChart" class="chart"></div>
-
+            <div id="stackedAreaChart" class="chart"></div>
         </div>
     </div>
 
@@ -112,11 +147,23 @@ const metrics = {
     totalMarketValue: "Ukupna tržišna vrijednost"
 };
 
+// Country to league mapping
+const countryToLeague = {
+    "France": "Ligue 1",
+    "Spain": "La Liga",
+    "Italy": "Serie A",
+    "Germany": "Bundesliga",
+    "United Kingdom": "Premier League",
+    "England": "Premier League"
+};
+
 let seasonLeagueData = {};
 let latestSeason = seasons[seasons.length - 1].name;
 let selectedSeason = latestSeason;
 let selectedLeague = leagues[0];
-let selectedMetric = "goals";
+let selectedMetric = "annualWageBillEUR";
+let isCountryView = false;
+let selectedCountry = null;
 
 function populateDropdowns() {
     const seasonSelect = d3.select("#seasonSelect");
@@ -163,7 +210,380 @@ function loadAllSeasonData(callback) {
     });
 }
 
+function resetToDefaultView() {
+    isCountryView = false;
+    selectedCountry = null;
+    
+    // Reset zoom
+    d3.select("#map svg g")
+        .transition()
+        .duration(750)
+        .attr("transform", "translate(0,0)scale(1)");
+    
+    // Remove country info div
+    d3.select("#countryInfo").remove();
+    
+    // Remove green background from charts container
+    d3.select("#charts").classed("country-view", false);
+    
+    // Show default charts
+    d3.select("#charts").html(`
+        <div id="tooltip" style="position:fixed; pointer-events:none; background:#fff; border:1px solid #ccc; border-radius:6px; padding:8px 12px; font-size:14px; display:none; z-index:10000;"></div>
+        <div class="selectors">
+            <div id="metricButtons" style="display:inline-block;">
+                <button class="metric-btn" data-metric="goals">Golovi</button>
+                <button class="metric-btn" data-metric="averageAge">Prosječna dob</button>
+                <button class="metric-btn" data-metric="foreignPlayers">Strani igrači</button>
+                <button class="metric-btn" data-metric="annualWageBillEUR">Ukupna plaća</button>
+            </div>
+        </div>
+        <div id="seasonLineChart" class="chart"></div>
+        <div id="stackedAreaChart" class="chart"></div>
+    `);
+    
+    // Re-bind metric button events
+    d3.selectAll(".metric-btn").on("click", function() {
+        const metric = d3.select(this).attr("data-metric");
+        selectedMetric = metric;
+        d3.selectAll(".metric-btn").classed("active", false);
+        d3.select(this).classed("active", true);
+        drawLineChart(selectedMetric);
+    });
+    
+    d3.select('.metric-btn[data-metric="' + selectedMetric + '"]').classed("active", true);
+    let g = d3.select("#map svg g");
+    g.selectAll(".club-dot").remove();
+    // Redraw default charts
+    drawLineChart(selectedMetric);
+    drawStackedAreaChart();
+    drawAllClubsOnMap(selectedSeason);
+}
+
+function drawCountrySpecificCharts(country, league, season) {
+    // Add green background to charts container
+    d3.select("#charts").classed("country-view", true);
+    
+    // Clear existing charts and create new layout for country view (without buttons)
+    d3.select("#charts").html(`
+        <div id="tooltip" style="position:fixed; pointer-events:none; background:#fff; border:1px solid #ccc; border-radius:6px; padding:8px 12px; font-size:14px; display:none; z-index:10000;"></div>
+        <div class="country-header" style="position: relative;">
+            <button class="close-btn" id="closeCountryView">X</button>
+            Sezona ${season.replace("_", "/")} ${league}
+        </div>
+        <div id="countryBarChart"></div>
+        <div id="countryScatterChart"></div>
+    `);
+    
+    // Bind close button event with d3
+    d3.select("#closeCountryView").on("click", resetToDefaultView);
+    
+    // Draw country-specific charts
+    drawCountryBarChart(country, league, season);
+    drawCountryScatterChart(country, league, season);
+}
+
+function drawCountryBarChart(country, league, season) {
+    d3.json(`data/${season}.json`, function(error, data) {
+        if (error || !data[league]) return;
+        
+        // Sort clubs by goals (descending) and take top 5
+        const clubs = data[league]
+            .sort((a, b) => b.goals - a.goals)
+            .slice(0, 5);
+        
+        const margin = { top: 20, right: 30, bottom: 60, left: 150 };
+        const width = 400 - margin.left - margin.right;
+        const height = 250 - margin.top - margin.bottom;
+
+        const legendWidth = 30, legendHeight = 150;
+
+        d3.select("#countryBarChart").html("");
+
+        const svg = d3.select("#countryBarChart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const x = d3.scale.linear()
+            .domain([0, d3.max(clubs, d => d.goals)])
+            .range([0, width]);
+
+        const y = d3.scale.ordinal()
+            .domain(clubs.map(d => d.club))
+            .rangeRoundBands([0, height], 0.1);
+
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.svg.axis().scale(x).orient("bottom").tickFormat(d3.format("d")))
+            .selectAll("text");
+
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.svg.axis().scale(y).orient("left"))
+            .selectAll("text")
+            .style("font-size", "10px")
+            .text(function(d) {
+                return d.length > 15 ? d.substring(0, 15) + "..." : d;
+            });
+
+    
+        const bars = svg.selectAll(".bar")
+            .data(clubs)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("y", d => y(d.club))
+            .attr("x", 0)
+            .attr("height", y.rangeBand())
+            .attr("width", 0)
+            .attr("fill", "#2e7d32"); // Darker green for bars
+
+        bars.transition()
+            .duration(800)
+            .attr("width", d => x(d.goals));
+
+        // Add text labels to bars
+        svg.selectAll(".bar-label")
+            .data(clubs)
+            .enter().append("text")
+            .attr("class", "bar-label")
+            .attr("y", d => y(d.club) + y.rangeBand() / 2 + 4)
+            .attr("x", d => x(d.goals) + 5)
+            .text(d => d.goals)
+            .style("opacity", 0)
+            .transition()
+            .duration(1000)
+            .style("opacity", 1);
+        
+
+        bars.on("mouseover", function(d, i) {
+            d3.select(this).style("opacity", 0.8);
+            d3.select("#tooltip")
+                .style("display", "block")
+                .html(`<strong>${d.club}</strong><br>Golovi: ${d.goals}`);
+        })
+        .on("mousemove", function() {
+            d3.select("#tooltip")
+                .style("left", (d3.event.pageX + 15) + "px")
+                .style("top", (d3.event.pageY - 20) + "px");
+        })
+        .on("mouseout", function() {
+            d3.select(this).style("opacity", 1);
+            d3.select("#tooltip").style("display", "none");
+        });
+    });
+}
+
+function drawCountryScatterChart(country, league, season) {
+    d3.json(`data/${season}.json`, function(error, data) {
+        if (error || !data[league]) return;
+        
+        const clubs = data[league];
+        
+        const margin = { top: 20, right: 30, bottom: 50, left: 80 };
+        const width = 400 - margin.left - margin.right;
+        const height = 250 - margin.top - margin.bottom;
+        const minPos = d3.min(clubs, d => d.position);
+        const maxPos = d3.max(clubs, d => d.position);
+
+        d3.select("#countryScatterChart").html("");
+
+        const svg = d3.select("#countryScatterChart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const x = d3.scale.linear()
+            .domain([0, d3.max(clubs, d => d.totalMarketValue)])
+            .range([0, width]);
+
+        const y = d3.scale.linear()
+            .domain([0, d3.max(clubs, d => d.annualWageBillEUR)])
+            .range([height, 0]);
+
+        const colorScale = d3.scale.linear()
+            .domain([minPos, maxPos])
+            .range(["#fff", "#000"]); 
+
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.svg.axis().scale(x).orient("bottom").ticks(Math.ceil((y.domain()[1] - y.domain()[0]) / 50000000)).tickFormat(function(d) {
+                if (d >= 1e6) return (d / 1e6) + "M";
+                if (d >= 1e3) return (d / 1e3) + "K";
+                return d;
+            }))
+            .selectAll;
+
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.svg.axis().scale(y).orient("left").tickFormat(function(d) {
+                if (d >= 1e6) return (d / 1e6) + "M";
+                if (d >= 1e3) return (d / 1e3) + "K";
+                return d;
+            }));
+
+
+        // Add axis labels
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", height + 40)
+            .style("text-anchor", "middle")
+            .style("font-size", "12px")
+            .text("Tržišna vrijednost");
+
+        svg.append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -50)
+            .attr("x", -height / 2)
+            .style("text-anchor", "middle")
+            .style("font-size", "12px")
+            .text("Ukupna plaća");
+
+        const circles = svg.selectAll(".dot")
+            .data(clubs)
+            .enter().append("circle")
+            .attr("class", "dot")
+            .attr("r", 0)
+            .attr("cx", d => x(d.totalMarketValue))
+            .attr("cy", d => y(d.annualWageBillEUR))
+            .attr("fill", d=> colorScale(d.position))
+            .attr("opacity", 1)
+            .style("cursor", "pointer");
+
+        circles.transition()
+            .duration(800)
+            .delay((d, i) => i * 100)
+            .attr("r", 6);
+
+        circles.on("mouseover", function(d, i) {
+            d3.select(this)
+                .transition()
+                .duration(100)
+                .attr("r", 8)
+                .attr("opacity", 1);
+            
+            d3.select("#tooltip")
+                .style("display", "block")
+                .style("opacity", 1)
+                .html(`<strong>${d.club}</strong><br>Pozicija: ${d.position}<br>Tržišna vrijednost: ${d.totalMarketValue ? d.totalMarketValue.toLocaleString() : 'N/A'}<br>Ukupna plaća: ${d.annualWageBillEUR ? d.annualWageBillEUR.toLocaleString() : 'N/A'}<br>Golovi: ${d.goals || 'N/A'}`);
+        })
+        .on("mousemove", function(d) {
+            d3.select("#tooltip")
+                .style("left", (d3.event.pageX + 15) + "px")
+                .style("top", (d3.event.pageY - 20) + "px");
+        })
+        .on("mouseout", function(d) {
+            d3.select(this)
+                .transition()
+                .duration(100)
+                .attr("r", 6)
+                .attr("opacity", 0.8);
+            
+            d3.select("#tooltip")
+                .style("display", "none")
+                .style("opacity", 0);
+        });
+    });
+}
+
+function drawClubSpecificCharts(club, season){
+    d3.select("#charts").classed("country-view", true);
+    
+    // Clear existing charts and create new layout for country view (without buttons)
+    d3.select("#charts").html(`
+        <div id="tooltip" style="position:fixed; pointer-events:none; background:#fff; border:1px solid #ccc; border-radius:6px; padding:8px 12px; font-size:14px; display:none; z-index:10000;"></div>
+        <div class="country-header" style="position: relative;">
+            <button class="close-btn" id="closeCountryView">X</button>
+            Sezona ${season.replace("_", "/")} ${club.club}
+        </div>
+        <div id="clubPieChart"></div>
+        <div id="countryScatterChart"></div>
+    `);
+
+    d3.select("#closeCountryView").on("click", resetToDefaultView);
+    
+    drawClubPieChart(club);
+}
+
+function drawClubPieChart(club) {
+    // Prepare data
+    const pieData = [
+        { label: "Pobjede", value: club.wins, color: "#388e3c" },
+        { label: "Neriješeno", value: club.draws, color: "#fbc02d" },
+        { label: "Porazi", value: club.losses, color: "#d32f2f" }
+    ];
+
+    const width = 300, height = 220, radius = Math.min(width, height) / 2 - 10;
+
+    d3.select("#clubPieChart").html(""); // Clear previous
+
+    const svg = d3.select("#clubPieChart")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", `translate(${width / 2},${height / 2})`);
+
+    const pie = d3.layout.pie()
+        .sort(null)
+        .value(d => d.value);
+
+    const arc = d3.svg.arc()
+        .outerRadius(radius)
+        .innerRadius(40);
+
+    const arcs = svg.selectAll(".arc")
+        .data(pie(pieData))
+        .enter().append("g")
+        .attr("class", "arc");
+
+    arcs.append("path")
+        .attr("d", arc)
+        .attr("fill", d => d.data.color)
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 2)
+        .style("opacity", 0.8)
+        .transition()
+        .duration(800)
+        .style("opacity", 1);
+
+    // Add labels
+    arcs.append("text")
+        .attr("transform", d => `translate(${arc.centroid(d)})`)
+        .attr("dy", "0.35em")
+        .attr("text-anchor", "middle")
+        .style("font-size", "13px")
+        .style("fill", "#222")
+        .text(d => d.data.value);
+
+    // Legend
+    const legend = svg.selectAll(".legend")
+        .data(pieData)
+        .enter().append("g")
+        .attr("class", "legend")
+        .attr("transform", (d, i) => `translate(-60,${i * 22 - 60})`);
+
+    legend.append("rect")
+        .attr("x", radius + 30)
+        .attr("width", 18)
+        .attr("height", 18)
+        .attr("fill", d => d.color);
+
+    legend.append("text")
+        .attr("x", radius + 54)
+        .attr("y", 13)
+        .style("font-size", "13px")
+        .text(d => d.label);
+}
+
 function drawLineChart(metric) {
+    if (isCountryView) return; // Don't draw if in country view
+    
     const chartData = leagues.map(league => ({
         league,
         values: seasons.map(season => ({
@@ -172,15 +592,15 @@ function drawLineChart(metric) {
         }))
     }));
 
-    const margin = {top: 30, right: 100, bottom: 40, left: 60};
-    const width = 600 - margin.left - margin.right;
-    const height = 350 - margin.top - margin.bottom;
+    const margin = { top: 20, right: 40, bottom: 30, left: 50 };
+    const width = 350 - margin.left - margin.right;
+    const height = 200 - margin.top - margin.bottom;
 
     d3.select("#seasonLineChart").html(""); 
 
     const svg = d3.select("#seasonLineChart")
         .append("svg")
-        .attr("width", width + margin.left + margin.right)
+        .attr("width", 550)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
@@ -230,7 +650,6 @@ svg.selectAll(".league-line")
     .on("click", function(d) {
         selectedLeague = d.league;
         d3.select("#leagueSelect").property("value", selectedLeague);
-        drawBarChart(selectedSeason, selectedLeague, selectedMetric);
     });
 
     chartData.forEach(d => {
@@ -245,9 +664,6 @@ svg.selectAll(".league-line")
         .on("click", function(v) {
             selectedLeague = d.league;
             selectedSeason = v.season;
-            d3.select("#leagueSelect").property("value", selectedLeague);
-            d3.select("#seasonSelect").property("value", selectedSeason);
-            drawBarChart(selectedSeason, selectedLeague, selectedMetric);
         })
         .on("mouseover", function(v) {
             d3.select(this).attr("r", 6);
@@ -282,8 +698,6 @@ svg.selectAll(".league-line")
         .style("cursor", "pointer")
         .on("click", function(d) {
             selectedLeague = d;
-            d3.select("#leagueSelect").property("value", selectedLeague);
-            drawBarChart(selectedSeason, selectedLeague, selectedMetric);
         });
 
     legend.append("rect")
@@ -298,145 +712,153 @@ svg.selectAll(".league-line")
         .style("font-size", "13px");
 }
 
-let barMode = "top";
-
-function drawBarChart(seasonName, league, metric) {
-    d3.json(`data/${seasonName}.json`, function(error, data) {
-        if (error || !data[league]) {
-            d3.select("#barChart").html("<p>Nema podataka za odabranu ligu.</p>");
+function drawMap(){
+    d3.json("data/Europe.json", function(error, europe) {
+        if (error) {
+            d3.select("#map").html("<p>Greška pri učitavanju mape Europe.</p>");
             return;
         }
 
-        const clubs = data[league];
-        const sortedDesc = clubs.slice().sort((a, b) => b[metric] - a[metric]);
-        const sortedAsc = clubs.slice().sort((a, b) => a[metric] - b[metric]);
-        let bars, label;
-
-        if (barMode === "top") {
-            bars = sortedDesc.slice(0, 5);
-            label = "Top 5";
-        } else {
-            bars = sortedAsc.slice(0, 5);
-            label = "Bottom 5";
-        }
-
-        // Add group info for coloring
-        bars = bars.map(d => ({...d, group: label}));
-
-        const margin = {top: 20, right: 30, bottom: 40, left: 120};
-        const width = 500 - margin.left - margin.right;
-        const height = 300 - margin.top - margin.bottom;
-
-        d3.select("#barChart").html("");
-
-        const svg = d3.select("#barChart")
+        const width = 750, height = 600;
+        const svg = d3.select("#map")
             .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", `translate(${margin.left},${margin.top})`);
+            .attr("width", width)
+            .attr("height", height)
+            .call(
+                d3.behavior.zoom()
+                    .scaleExtent([1, 8])
+                    .on("zoom", function() {
+                        g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+                    })
+            );
 
-        const y = d3.scale.ordinal()
-            .domain(bars.map(d => d.club))
-            .rangeRoundBands([0, height], 0.1);
+        const projection = d3.geo.mercator()
+            .center([0, 45])
+            .scale(800)
+            .translate([width / 2, height / 2]);
 
-        const x = d3.scale.linear()
-            .domain([0, d3.max(bars, d => d[metric])])
-            .range([0, width]);
+        const path = d3.geo.path().projection(projection);
 
-        svg.append("g")
-            .call(d3.svg.axis().scale(y).orient("left"));
+        const g = svg.append("g");
 
-        svg.append("g")
-            .attr("transform", `translate(0,${height})`)
-            .call(d3.svg.axis().scale(x).orient("bottom"));
+        svg.call(d3.behavior.zoom()
+            .scaleExtent([1, 8])
+            .on("zoom", function() {
+                g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+            })
+        );
 
-        svg.selectAll(".bar")
-            .data(bars)
-            .enter().append("rect")
-            .attr("class", "bar")
-            .attr("y", d => y(d.club))
-            .attr("height", y.rangeBand())
-            .attr("x", 0)
-            .attr("width", 0)
-            .transition()
-            .duration(900)
-            .attr("width", d => x(d[metric]))
-            .attr("fill", barMode === "top" ? "#4aaeea" : "#e95c5c");
+        g.selectAll("path")
+            .data(europe.features)
+            .enter().append("path")
+            .attr("d", path)
+            .attr("class", "country")
+            .attr("fill", "#000")
+            .attr("stroke", "#bdbdbd")
+            .on("mouseover", function() { d3.select(this).attr("fill", "#a0a0a000"); })
+            .on("mouseout", function() { d3.select(this).attr("fill", "#000"); })
+            .on("click", function(d) {
+                const countryName = d.properties.name || d.properties.NAME;
+                const seasonName = sliderSeasons[document.getElementById("seasonSlider").value].name;
+                const league = countryToLeague[countryName];
+                
+                if (!league) return; 
+                
+                isCountryView = true;
+                selectedCountry = countryName;
+                selectedLeague = league;
+                
+                // Zoom to country
+                var bounds = path.bounds(d),
+                    dx = bounds[1][0] - bounds[0][0],
+                    dy = bounds[1][1] - bounds[0][1],
+                    x = (bounds[0][0] + bounds[1][0]) / 2,
+                    y = (bounds[0][1] + bounds[1][1]) / 2,
+                    scale = Math.max(1, Math.min(8, 0.8 / Math.max(dx / 600, dy / 700))),
+                    translate = [600 / 2 - scale * x, 700 / 2 - scale * y];
 
-        svg.selectAll(".label")
-            .data(bars)
-            .enter().append("text")
-            .attr("x", d => x(d[metric]) + 5)
-            .attr("y", d => y(d.club) + y.rangeBand() / 2 + 5)
-            .text(d => d[metric])
-            .style("font-size", "12px");
+                d3.select("#map svg g")
+                    .transition()
+                    .duration(750)
+                    .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+
+                let g = d3.select("#map svg g");
+
+                // Remove all previous club dots (circles or images)
+                g.selectAll(".club-dot").remove();
+                drawClubsForSelectedSeason(seasonName,  league);
+                drawCountrySpecificCharts(countryName, league, seasonName);
+            });
     });
 }
 
-d3.select("#metricSelect").on("change", function() {
-    selectedMetric = this.value;
-    drawLineChart(selectedMetric);
-    drawBarChart(selectedSeason, selectedLeague, selectedMetric);
-});
-d3.select("#seasonSelect").on("change", function() {
-    selectedSeason = this.value;
-    drawBarChart(selectedSeason, selectedLeague, selectedMetric);
-});
-d3.select("#leagueSelect").on("change", function() {
-    selectedLeague = this.value;
-    drawBarChart(selectedSeason, selectedLeague, selectedMetric);
-});
+function drawClubsForSelectedSeason(seasonName, league) {
+    d3.json(`data/${selectedSeason}.json`, function(error, data) {
+        if (error) return;
 
-d3.select("#toggleBarMode").on("click", function() {
-    barMode = barMode === "top" ? "bottom" : "top";
-    this.textContent = barMode === "top" ? "Prikaži samo Bottom 5" : "Prikaži samo Top 5";
-    drawBarChart(selectedSeason, selectedLeague, selectedMetric);
-});
+        let clubs = [];
+        const width = 750, height = 600;
 
-loadAllSeasonData(() => {
-    populateDropdowns();
-    drawLineChart(selectedMetric);
-    drawBarChart(selectedSeason, selectedLeague, selectedMetric);
-});
+        const projection = d3.geo.mercator()
+            .center([0, 45])
+            .scale(800)
+            .translate([width / 2, height / 2]);
 
-d3.json("data/Europe.json", function(error, europe) {
-    if (error) {
-        d3.select("#map").html("<p>Greška pri učitavanju mape Europe.</p>");
-        return;
-    }
+        if (data[league]) {
+            clubs = data[league].filter(club =>
+                club.lat && club.lon && club.club && club.logo
+            );
+        }
 
-    const width = 500, height = 600;
-    const svg = d3.select("#map")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .call(d3.behavior.zoom().scaleExtent([1, 8])
-                .on("zoom", zoom));
+        let g = d3.select("#map svg g");
 
-    const projection = d3.geo.mercator()
-        .center([20, 55])
-        .scale(350)
-        .translate([width / 2, height / 2]);
+        // DATA JOIN (do NOT remove all .club-dot before this!)
+        const clubDots = g.selectAll(".club-dot")
+            .data(clubs, d => d.club); // use club name as key
 
-    const path = d3.geo.path().projection(projection);
 
-    svg.selectAll("path")
-        .data(europe.features)
-        .enter().append("path")
-        .attr("d", path)
-        .attr("class", "country")
-        .attr("fill", "#ddd")
-        .attr("stroke", "#999")
-        .on("mouseover", function() { d3.select(this).attr("fill", "#4aaeea"); })
-        .on("mouseout", function() { d3.select(this).attr("fill", "#ddd"); });
-});
+        // EXIT old clubs
+        clubDots.exit()
+            .transition()
+            .duration(400)
+            .style("opacity", 0)
+            .remove();
+
+        // UPDATE existing clubs
+        clubDots
+            .transition()
+            .duration(400)
+            .attr("x", d => projection([d.lon, d.lat])[0] - 5)
+            .attr("y", d => projection([d.lon, d.lat])[1] - 5)
+            .attr("xlink:href", d => d.logo)
+            .style("opacity", 1);
+
+        // ENTER new clubs
+        clubDots.enter()
+            .append("image")
+            .attr("class", "club-dot")
+            .attr("xlink:href", d => d.logo)
+            .attr("x", d => projection([d.lon, d.lat])[0] - 5)
+            .attr("y", d => projection([d.lon, d.lat])[1] - 5)
+            .attr("height", 10)
+            .attr("width", 10)
+            .style("opacity", 0)
+            .transition()
+            .duration(400)
+            .style("opacity", 1);
+
+        clubDots.on("click", function(d) {
+            drawClubSpecificCharts(d, selectedSeason);
+        })
+    });
+}
+
 function drawAllClubsOnMap(seasonName) {
-    // Učitaj podatke za sezonu
+    if (isCountryView) return; // Don't redraw if in country view
+    
     d3.json(`data/${seasonName}.json`, function(error, data) {
         if (error) return;
 
-        // Skupi sve klubove iz svih liga
         let allClubs = [];
         leagues.forEach(league => {
             if (data[league]) {
@@ -444,22 +866,25 @@ function drawAllClubsOnMap(seasonName) {
             }
         });
 
-        const width = 500, height = 600;
+        const width = 750, height = 600;
         const projection = d3.geo.mercator()
-            .center([20, 55])
-            .scale(350)
+            .center([0, 45])
+            .scale(800)
             .translate([width / 2, height / 2]);
 
-        // Selektiraj svg i grupu (ako nema, napravi je)
-        const svg = d3.select("#map svg");
-        let g = svg.select("g.club-group");
+        const svg = d3.select("#map svg g");
+        if(svg.empty()){
+            setTimeout(() => {
+                drawAllClubsOnMap(seasonName);
+            }, 100);
+        }
+        let g = d3.select("#map svg g");
+
         if (g.empty()) g = svg.append("g").attr("class", "club-group");
 
-        // DATA JOIN
         const dots = g.selectAll(".club-dot")
             .data(allClubs, d => d.club + d.lat + d.lon);
 
-        // EXIT - animacija nestanka
         dots.exit()
             .transition()
             .duration(500)
@@ -467,7 +892,6 @@ function drawAllClubsOnMap(seasonName) {
             .style("opacity", 0)
             .remove();
 
-        // UPDATE - postojeće točke
         dots.transition()
             .duration(500)
             .attr("cx", d => projection([d.lon, d.lat])[0])
@@ -475,14 +899,13 @@ function drawAllClubsOnMap(seasonName) {
             .attr("r", 4)
             .style("opacity", 1);
 
-        // ENTER - nove točke
         dots.enter()
             .append("circle")
             .attr("class", "club-dot")
             .attr("cx", d => projection([d.lon, d.lat])[0])
             .attr("cy", d => projection([d.lon, d.lat])[1])
             .attr("r", 0)
-            .attr("fill", "#e95c5c")
+            .attr("fill", "#0b762d")
             .style("opacity", 0)
             .on("mouseover", function(d) {
                 d3.select("#tooltip")
@@ -503,8 +926,10 @@ function drawAllClubsOnMap(seasonName) {
             .style("opacity", 1);
     });
 }
+
 function drawStackedAreaChart(metric = "totalMarketValue") {
-    // Pripremi podatke: [{season, Premier League: ..., La Liga: ..., ...}]
+    if (isCountryView) return; // Don't draw if in country view
+    
     const data = seasons.map(season => {
         const entry = { season: season.name };
         leagues.forEach(league => {
@@ -513,20 +938,17 @@ function drawStackedAreaChart(metric = "totalMarketValue") {
         return entry;
     });
 
-    // Sortiraj lige po ukupnoj vrijednosti (najmanja dolje)
     const leagueTotals = leagues.map(league => ({
         league,
         total: d3.sum(data, d => d[league])
     }));
     const sortedLeagues = leagueTotals.sort((a, b) => a.total - b.total).map(d => d.league);
 
-    // Stack layout
     const stack = d3.layout.stack()
         .values(d => d.values)
         .x(d => d.season)
         .y(d => d.value);
 
-    // Pripremi podatke za stack
     const stackedData = stack(sortedLeagues.map(league => ({
         league,
         values: data.map(d => ({
@@ -534,35 +956,31 @@ function drawStackedAreaChart(metric = "totalMarketValue") {
             value: d[league]
         }))
     })));
-
-    const margin = {top: 30, right: 30, bottom: 50, left: 70};
-    const width = 600 - margin.left - margin.right;
-    const height = 320 - margin.top - margin.bottom;
+    
+    const margin = { top: 20, right: 30, bottom: 30, left: 60 };
+    const width = 400 - margin.left - margin.right;
+    const height = 200 - margin.top - margin.bottom;
     const legendOffset = 150;
 
-    d3.select("#stackedBarChart").html("");
+    d3.select("#stackedAreaChart").html("");
 
-    const svg = d3.select("#stackedBarChart")
+    const svg = d3.select("#stackedAreaChart")
         .append("svg")
         .attr("width", width + margin.left + margin.right+ legendOffset)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // X: sezone
     const x = d3.scale.ordinal()
         .domain(seasons.map(s => s.name))
         .rangePoints([0, width]);
 
-    // Y: ukupna vrijednost (stacked)
     const y = d3.scale.linear()
         .domain([0, d3.max(stackedData[stackedData.length - 1].values, d => d.y0 + d.value) * 1.1])
         .range([height, 0]);
 
-    // Boje po ligi
-    const color = d3.scale.category10().domain(sortedLeagues);
+    const color = d3.scale.category10().domain(leagues);
 
-    // Os X
     svg.append("g")
         .attr("transform", `translate(0,${height})`)
         .call(d3.svg.axis().scale(x).orient("bottom"))
@@ -570,7 +988,6 @@ function drawStackedAreaChart(metric = "totalMarketValue") {
         .style("text-anchor", "middle")
         .text(d => d.replace("_", "/"));
 
-    // Os Y
     svg.append("g")
         .call(d3.svg.axis().scale(y).orient("left").tickFormat(function(d) {
             if (d >= 1e9) return (d / 1e9) + "B"; 
@@ -578,13 +995,11 @@ function drawStackedAreaChart(metric = "totalMarketValue") {
             return d;
         }));
 
-    // Area generator
     const area = d3.svg.area()
         .x(d => x(d.season))
         .y0(d => y(d.y0))
         .y1(d => y(d.y0 + d.value));
 
-    // nacrtaj stacked area
     svg.selectAll(".area")
         .data(stackedData)
         .enter().append("path")
@@ -596,7 +1011,6 @@ function drawStackedAreaChart(metric = "totalMarketValue") {
             d3.select(this).attr("opacity", 1);
         })
         .on("mousemove", function(d) {
-            // Pronađi najbližu sezonu prema mišu
             const mouseX = d3.mouse(this)[0];
             const seasonIdx = d3.bisect(x.range(), mouseX) - 1;
             const season = seasons[seasonIdx] ? seasons[seasonIdx].name : seasons[0].name;
@@ -617,51 +1031,58 @@ function drawStackedAreaChart(metric = "totalMarketValue") {
             d3.select("#tooltip").style("display", "none");
         });
 
-    // Legenda
     const legend = svg.selectAll(".legend")
     .data(sortedLeagues)
     .enter().append("g")
     .attr("class", "legend")
-    .attr("transform", (d,i) => `translate(${width + 30},${i*22})`); // desno od grafa
+    .attr("transform", (d,i) => `translate(${width + 30},${i*22})`); 
 
 legend.append("rect")
-    .attr("x", 0) // boja odmah lijevo
+    .attr("x", 0) 
     .attr("width", 18)
     .attr("height", 18)
     .attr("fill", color);
 
 legend.append("text")
-    .attr("x", 26) // tekst desno od boje
+    .attr("x", 26) 
     .attr("y", 13)
     .attr("text-anchor", "start")
     .style("font-size", "13px")
     .text(d => d);
 }
-d3.select("#seasonSlider").on("input", function() {
-    const idx = +this.value;
-    d3.select("#sliderLabel").text(sliderSeasons[idx].label);
-    drawAllClubsOnMap(sliderSeasons[idx].name);
-});
-drawAllClubsOnMap(sliderSeasons[sliderSeasons.length - 1].name);
-
 
 loadAllSeasonData(() => {
-        populateDropdowns();
-        drawLineChart(selectedMetric);
-        drawStackedAreaChart();
+    populateDropdowns();
+    drawLineChart(selectedMetric);
+    drawStackedAreaChart();
+    drawMap();
+    drawAllClubsOnMap(selectedSeason);
 });
+
 d3.selectAll(".metric-btn").on("click", function() {
     const metric = d3.select(this).attr("data-metric");
     selectedMetric = metric;
 
     d3.selectAll(".metric-btn").classed("active", false);
     d3.select(this).classed("active", true);
-
+    
     drawLineChart(selectedMetric);
-    drawBarChart(selectedSeason, selectedLeague, selectedMetric);
 });
 
 d3.select('.metric-btn[data-metric="' + selectedMetric + '"]').classed("active", true);
+
+d3.select("#seasonSlider").on("input", function() {
+    const idx = +this.value;
+    selectedSeason = sliderSeasons[idx].name;
+    if (!isCountryView) {
+        drawAllClubsOnMap(sliderSeasons[idx].name);
+    }
+    else{
+        drawCountrySpecificCharts(selectedCountry, selectedLeague, sliderSeasons[idx].name);
+        drawClubsForSelectedSeason(selectedSeason, selectedLeague);
+    }
+});
+
 function zoom(){
     d3.select("#map svg").attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 }
