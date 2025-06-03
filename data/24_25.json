@@ -41,7 +41,8 @@
         {"club":"Real Valladolid","annualWageBillEUR":22000000,"totalMarketValue":43300000,"squad":26,"foreignPlayers":18,"averageAge":27.1,"goals":26,"wins":4,"draws":4,"losses":30,"position":20,"lat":41.629,"lon":-4.7544,"logo":"crests/valladolid.png"},
         {"club":"Sevilla","annualWageBillEUR":58730000,"totalMarketValue":174500000,"squad":25,"foreignPlayers":13,"averageAge":25.9,"goals":42,"wins":10,"draws":11,"losses":17,"position":17,"lat":37.3565,"lon":-5.9819,"logo":"crests/sevilla.png"},
         {"club":"Valencia","annualWageBillEUR":37320000,"totalMarketValue":214900000,"squad":26,"foreignPlayers":9,"averageAge":26.0,"goals":44,"wins":11,"draws":13,"losses":14,"position":12,"lat":39.4745,"lon":-0.3582,"logo":"crests/valencia.png"},
-        {"club":"Villarreal","annualWageBillEUR":44370000,"totalMarketValue":218600000,"squad":24,"foreignPlayers":11,"averageAge":27.5,"goals":71,"wins":20,"draws":10,"losses":8,"position":5,"lat":39.9448,"lon":-0.1032,"logo":"crests/villarreal.png"}],
+        {"club":"Villarreal","annualWageBillEUR":44370000,"totalMarketValue":218600000,"squad":24,"foreignPlayers":11,"averageAge":27.5,"goals":71,"wins":20,"draws":10,"losses":8,"position":5,"lat":39.9448,"lon":-0.1032,"logo":"crests/villarreal.png"}
+    ],
     "Serie A": [
         {"club":"AC Milan","annualWageBillEUR":97550000,"totalMarketValue":523500000,"squad":26,"foreignPlayers":20,"averageAge":26.4,"goals":61,"wins":18,"draws":9,"losses":11,"position":8,"lat":45.4781,"lon":9.124,"logo":"crests/milan.png"},
         {"club":"Atalanta","annualWageBillEUR":56240000,"totalMarketValue":478600000,"squad":26,"foreignPlayers":14,"averageAge":27.8,"goals":78,"wins":22,"draws":8,"losses":8,"position":3,"lat":45.7067,"lon":9.6722,"logo":"crests/atalanta.png"},
