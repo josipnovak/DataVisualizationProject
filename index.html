@@ -994,7 +994,11 @@ function drawMap(){
             d3.select("#map").html("<p>Greška pri učitavanju mape Europe.</p>");
             return;
         }
-
+        const zoom = d3.behavior.zoom()
+            .scaleExtent([1, 8])
+            .on("zoom", function() {
+                g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+            });
         const width = 750, height = 600;
         const svg = d3.select("#map")
             .append("svg")
@@ -1017,12 +1021,7 @@ function drawMap(){
 
         const g = svg.append("g");
 
-        svg.call(d3.behavior.zoom()
-            .scaleExtent([1, 8])
-            .on("zoom", function() {
-                g.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-            })
-        );
+        svg.call(zoom);
 
         g.selectAll("path")
             .data(europe.features)
@@ -1052,6 +1051,7 @@ function drawMap(){
                     scale = Math.max(1, Math.min(8, 0.8 / Math.max(dx / 600, dy / 700))),
                     translate = [600 / 2 - scale * x, 700 / 2 - scale * y];
 
+                zoom.translate(translate).scale(scale)
                 d3.select("#map svg g")
                     .transition()
                     .duration(750)
