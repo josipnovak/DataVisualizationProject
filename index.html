@@ -807,7 +807,6 @@ function drawClubPositionLineChart(clubName) {
             .domain([20, 1])
             .range([height, 0]);
 
-        // Line generator that skips nulls
         const line = d3.svg.line()
             .defined(d => d.position !== null)
             .x(d => x(d.season))
@@ -830,7 +829,6 @@ function drawClubPositionLineChart(clubName) {
                     .attr("stroke-dashoffset", 0);
             });
 
-        // Draw circles for played seasons, and crosses for missing
         svg.selectAll("circle")
             .data(data)
             .enter().append("circle")
@@ -859,7 +857,6 @@ function drawClubPositionLineChart(clubName) {
                 d3.select("#tooltip").style("display", "none");
             });
 
-        // Draw X for missing seasons
         svg.selectAll(".missing-cross")
             .data(data.filter(d => d.position === null))
             .enter()
@@ -1167,10 +1164,10 @@ function drawMap(){
             .enter().append("path")
             .attr("d", path)
             .attr("class", "country")
-            .attr("fill", "#000")
+            .attr("fill", "#555")
             .attr("stroke", "#bdbdbd")
             .on("mouseover", function() { d3.select(this).attr("fill", "#a0a0a000"); })
-            .on("mouseout", function() { d3.select(this).attr("fill", "#000"); })
+            .on("mouseout", function() { d3.select(this).attr("fill", "#555"); })
             .on("click", function(d) {
                 const countryName = d.properties.name || d.properties.NAME;
                 const seasonName = sliderSeasons[document.getElementById("seasonSlider").value].name;
@@ -1331,7 +1328,7 @@ function drawAllClubsOnMap(seasonName) {
             .on("mouseover", function(d) {
                 d3.select("#tooltip")
                   .style("display", "block")
-                  .html(`<strong>${d.club}</strong><br/>${d.lat}, ${d.lon}`);
+                  .html(`<strong>${d.club}</strong>`);
             })
             .on("mousemove", function() {
                 d3.select("#tooltip")
