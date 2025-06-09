@@ -1,0 +1,94 @@
+.container {
+    display: flex;
+    font-family: Arial, sans-serif;
+}
+#map {  
+    width: 55%;
+    height: 600px;
+    border-right: 2px solid #ccc;
+}
+#map > svg {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 50px;
+}
+#charts {
+    width: 45%;
+    height: 640px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 10px;
+    align-items: center;
+}
+#charts.country-view {
+    background-color: #4caf4fa0;
+}
+.selectors {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+.chart {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
+}
+.country {
+    cursor: pointer;
+}
+.axis text {
+    font-size: 12px;
+}
+.metric-btn {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.metric-btn.active, .metric-btn:hover {
+    background-color: #388e3c;
+    color: white;
+}
+.country-header {
+    padding: 15px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+}
+.bar-label {
+    fill: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+.club-name {
+    fill: white;
+    font-size: 11px;
+    font-weight: bold;
+}
+#countryBarChart{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#countryBarChart svg {
+    display: block;
+    margin: auto;
+}
